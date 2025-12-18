@@ -1,0 +1,27 @@
+# Node artifacts
+node_modules/
+**/node_modules/
+
+# Environment files
+.env
+*.env
+backend/.env
+frontend/.env
+
+# Logs and pid
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.pid
+*.seed
+
+# Build outputs
+backend/dist/
+frontend/dist/
+coverage/
+
+# Editor
+.vscode/
+.DS_Store
+Thumbs.db
