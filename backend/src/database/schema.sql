@@ -1,178 +1,191 @@
--- Black Vein Oracle schema
--- This file is the heart that “learns to bleed”: every table, constraint, and column is chosen
--- to showcase advanced PostgreSQL craft (recursive CTE-ready graph tables, temporal columns,
--- full-text search, and integrity rules) for grading.
+-- Bangladesh Jail + Thana Management schema
+-- Clear, linear, production-ready entities (Bangladesh context)
 
--- Extensions that power FTS and UUID generation
 CREATE EXTENSION IF NOT EXISTS pgcrypto; -- for gen_random_uuid()
-CREATE EXTENSION IF NOT EXISTS pg_trgm;  -- supports trigram indexes for fuzzy search
 
--- Reference data for ranks and severity scoring keeps rubric-visible domain constraints tight
-CREATE TABLE IF NOT EXISTS agent_ranks (
-	rank_code TEXT PRIMARY KEY,
-	hierarchy INT NOT NULL CHECK (hierarchy > 0)
+-- Admin (government)
+CREATE TABLE IF NOT EXISTS admin (
+	admin_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	full_name TEXT NOT NULL,
+	email TEXT NOT NULL UNIQUE
 );
 
-INSERT INTO agent_ranks (rank_code, hierarchy) VALUES
-	('field', 1),
-	('lead', 2),
-	('analyst', 2),
-	('chief', 3)
+-- Thana (police station)
+CREATE TABLE IF NOT EXISTS thanas (
+	thana_id SERIAL PRIMARY KEY,
+	name TEXT NOT NULL,
+	district TEXT NOT NULL,
+	address TEXT NOT NULL,
+	created_by_admin_id UUID NOT NULL REFERENCES admin(admin_id),
+	head_officer_id UUID
+);
+
+-- Police ranks
+CREATE TABLE IF NOT EXISTS ranks (
+	rank_code TEXT PRIMARY KEY,
+	rank_name TEXT NOT NULL,
+	level INT NOT NULL CHECK (level >= 1)
+);
+
+INSERT INTO ranks (rank_code, rank_name, level) VALUES
+	('constable', 'Constable', 1),
+	('si', 'Sub-Inspector', 2),
+	('inspector', 'Inspector', 3),
+	('oc', 'Officer-in-Charge', 4)
 ON CONFLICT DO NOTHING;
 
--- Agents table: demonstrates uniqueness, FK to domain table, and auditing columns
-CREATE TABLE IF NOT EXISTS agents (
-	agent_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	codename TEXT NOT NULL UNIQUE,
+-- Police officers
+CREATE TABLE IF NOT EXISTS officers (
+	officer_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	thana_id INT NOT NULL REFERENCES thanas(thana_id) ON DELETE CASCADE,
+	rank_code TEXT NOT NULL REFERENCES ranks(rank_code),
 	full_name TEXT NOT NULL,
-	rank_code TEXT NOT NULL REFERENCES agent_ranks(rank_code),
-	clearance_level INT NOT NULL CHECK (clearance_level BETWEEN 1 AND 10),
-	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-	last_active_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	badge_no TEXT NOT NULL UNIQUE
 );
 
--- HQ table: single logical HQ for dashboard rollups
-CREATE TABLE IF NOT EXISTS headquarters (
-	hq_id SERIAL PRIMARY KEY,
-	name TEXT NOT NULL,
-	region TEXT NOT NULL,
-	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+-- Link thana head (optional 1:1)
+ALTER TABLE thanas
+	ADD CONSTRAINT fk_thana_head_officer
+	FOREIGN KEY (head_officer_id) REFERENCES officers(officer_id);
 
--- Locations table: normalized for incidents + network visualization layers
+-- Locations in Bangladesh
 CREATE TABLE IF NOT EXISTS locations (
 	location_id SERIAL PRIMARY KEY,
-	label TEXT NOT NULL,
-	geo_point GEOGRAPHY(POINT, 4326),
-	city TEXT,
-	country TEXT,
-	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	district TEXT NOT NULL,
+	thana_area TEXT,
+	address TEXT
 );
 
--- Criminals: includes FTS generated column to grade search/index craft
+-- General users (citizens) with login
+CREATE TABLE IF NOT EXISTS users (
+	user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	full_name TEXT NOT NULL,
+	nid_number TEXT NOT NULL UNIQUE,
+	phone TEXT NOT NULL,
+	address TEXT,
+	email TEXT NOT NULL UNIQUE,
+	password_hash TEXT NOT NULL
+);
+
+-- Online GD reports (submitted by users, approved by thana officer)
+CREATE TABLE IF NOT EXISTS gd_reports (
+	gd_id BIGSERIAL PRIMARY KEY,
+	user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+	thana_id INT NOT NULL REFERENCES thanas(thana_id),
+	submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	description TEXT NOT NULL,
+	status TEXT NOT NULL CHECK (status IN ('submitted','approved','rejected')) DEFAULT 'submitted',
+	approved_by_officer_id UUID REFERENCES officers(officer_id)
+);
+
+-- Criminal master record
 CREATE TABLE IF NOT EXISTS criminals (
 	criminal_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	primary_name TEXT NOT NULL,
-	nationality TEXT,
-	risk_score NUMERIC(5,2) DEFAULT 0 CHECK (risk_score >= 0),
-	captured BOOLEAN NOT NULL DEFAULT FALSE,
-	dossier JSONB DEFAULT '{}'::JSONB,
-	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-	updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-	search_vector tsvector GENERATED ALWAYS AS (
-		setweight(to_tsvector('english', coalesce(primary_name,'')), 'A') ||
-		setweight(to_tsvector('english', coalesce(nationality,'')), 'B') ||
-		setweight(to_tsvector('english', coalesce(dossier::text,'')), 'C')
-	) STORED
+	full_name TEXT NOT NULL,
+	nid_or_alias TEXT,
+	status TEXT NOT NULL CHECK (status IN ('in_custody','on_bail','released','escaped','unknown')) DEFAULT 'unknown',
+	risk_level INT NOT NULL CHECK (risk_level BETWEEN 1 AND 10) DEFAULT 1,
+	registered_thana_id INT REFERENCES thanas(thana_id)
 );
 
--- Aliases to demonstrate 1:N with uniqueness scoped by criminal
-CREATE TABLE IF NOT EXISTS criminal_aliases (
-	alias_id SERIAL PRIMARY KEY,
-	criminal_id UUID NOT NULL REFERENCES criminals(criminal_id) ON DELETE CASCADE,
-	alias TEXT NOT NULL,
-	confidence INT NOT NULL CHECK (confidence BETWEEN 1 AND 100),
-	noted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-	UNIQUE (criminal_id, alias)
-);
-
--- Organizations and memberships to fuel recursive network queries
+-- Criminal organizations (gangs)
 CREATE TABLE IF NOT EXISTS organizations (
 	org_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	name TEXT NOT NULL UNIQUE,
 	ideology TEXT,
-	threat_level INT CHECK (threat_level BETWEEN 1 AND 10),
+	threat_level INT NOT NULL CHECK (threat_level BETWEEN 1 AND 10),
 	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS memberships (
-	membership_id SERIAL PRIMARY KEY,
-	org_id UUID NOT NULL REFERENCES organizations(org_id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS criminal_organizations (
 	criminal_id UUID NOT NULL REFERENCES criminals(criminal_id) ON DELETE CASCADE,
-	joined_at DATE NOT NULL DEFAULT CURRENT_DATE,
-	left_at DATE,
+	org_id UUID NOT NULL REFERENCES organizations(org_id) ON DELETE CASCADE,
 	role TEXT,
-	CHECK (left_at IS NULL OR left_at >= joined_at),
-	UNIQUE (org_id, criminal_id, joined_at)
+	PRIMARY KEY (criminal_id, org_id)
 );
 
--- Relationship graph between criminals (edges) to drive recursive CTE distance up to 6 hops
-CREATE TABLE IF NOT EXISTS relationships (
-	relationship_id SERIAL PRIMARY KEY,
-	source_id UUID NOT NULL REFERENCES criminals(criminal_id) ON DELETE CASCADE,
-	target_id UUID NOT NULL REFERENCES criminals(criminal_id) ON DELETE CASCADE,
-	relation_type TEXT NOT NULL CHECK (relation_type IN ('associate','family','financial','accomplice','mentor','handler')),
-	strength INT NOT NULL CHECK (strength BETWEEN 1 AND 10),
-	first_seen TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-	last_seen TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-	discovered_in_incident BIGINT,
-	UNIQUE (source_id, target_id, relation_type)
+-- Criminal to criminal relationship (self-relation)
+CREATE TABLE IF NOT EXISTS criminal_relations (
+	relation_id SERIAL PRIMARY KEY,
+	criminal_id_1 UUID NOT NULL REFERENCES criminals(criminal_id) ON DELETE CASCADE,
+	criminal_id_2 UUID NOT NULL REFERENCES criminals(criminal_id) ON DELETE CASCADE,
+	relation_type TEXT NOT NULL CHECK (relation_type IN ('associate','family','financial','accomplice')),
+	CHECK (criminal_id_1 <> criminal_id_2),
+	UNIQUE (criminal_id_1, criminal_id_2, relation_type)
 );
 
--- Incidents: includes temporal validity and warning_level to drive bleeding alerts
-CREATE TABLE IF NOT EXISTS incidents (
-	incident_id BIGSERIAL PRIMARY KEY,
-	title TEXT NOT NULL,
-	description TEXT,
-	occurred_at TIMESTAMPTZ NOT NULL,
-	reported_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-	location_id INT REFERENCES locations(location_id),
-	recorded_by UUID REFERENCES agents(agent_id),
-	warning_level INT NOT NULL CHECK (warning_level BETWEEN 1 AND 10),
-	valid_from TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-	valid_to TIMESTAMPTZ NOT NULL DEFAULT '9999-12-31',
-	status TEXT NOT NULL DEFAULT 'open',
-	UNIQUE (title, occurred_at)
+-- Criminal case file
+CREATE TABLE IF NOT EXISTS case_files (
+	case_id BIGSERIAL PRIMARY KEY,
+	case_number TEXT NOT NULL UNIQUE,
+	criminal_id UUID NOT NULL REFERENCES criminals(criminal_id) ON DELETE CASCADE,
+	thana_id INT NOT NULL REFERENCES thanas(thana_id),
+	case_type TEXT NOT NULL,
+	status TEXT NOT NULL CHECK (status IN ('open','investigating','closed')) DEFAULT 'open',
+	filed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Incident participants: maps criminals and victims into incidents for timeline slider
-CREATE TABLE IF NOT EXISTS incident_participants (
-	incident_id BIGINT NOT NULL REFERENCES incidents(incident_id) ON DELETE CASCADE,
-	criminal_id UUID REFERENCES criminals(criminal_id) ON DELETE CASCADE,
-	role TEXT CHECK (role IN ('suspect','mastermind','accomplice','victim','witness')),
-	PRIMARY KEY (incident_id, criminal_id, role)
-);
-
--- Victims table for predictive at-risk analysis
-CREATE TABLE IF NOT EXISTS victims (
-	victim_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+-- Jails and cells
+CREATE TABLE IF NOT EXISTS jails (
+	jail_id SERIAL PRIMARY KEY,
 	name TEXT NOT NULL,
-	risk_band TEXT CHECK (risk_band IN ('low','medium','high')),
-	protected BOOLEAN NOT NULL DEFAULT FALSE,
-	last_seen_incident BIGINT REFERENCES incidents(incident_id)
+	district TEXT NOT NULL,
+	address TEXT NOT NULL,
+	capacity INT NOT NULL CHECK (capacity > 0)
 );
 
--- Communications capture temporal graph activity for timeline slider and window functions
-CREATE TABLE IF NOT EXISTS communications (
-	communication_id BIGSERIAL PRIMARY KEY,
-	sender UUID NOT NULL REFERENCES criminals(criminal_id),
-	receiver UUID NOT NULL REFERENCES criminals(criminal_id),
-	sent_at TIMESTAMPTZ NOT NULL,
-	channel TEXT NOT NULL CHECK (channel IN ('sms','email','darknet','radio','dead_drop')),
-	content TEXT,
-	content_vector tsvector GENERATED ALWAYS AS (to_tsvector('english', coalesce(content,''))) STORED
+CREATE TABLE IF NOT EXISTS cell_blocks (
+	block_id SERIAL PRIMARY KEY,
+	jail_id INT NOT NULL REFERENCES jails(jail_id) ON DELETE CASCADE,
+	block_name TEXT NOT NULL,
+	capacity INT NOT NULL CHECK (capacity > 0)
 );
 
--- Alerts table captures bleeding events triggered by SQL-level checks; also used by WebSocket
-CREATE TABLE IF NOT EXISTS alerts (
-	alert_id BIGSERIAL PRIMARY KEY,
-	incident_id BIGINT NOT NULL REFERENCES incidents(incident_id) ON DELETE CASCADE,
-	triggered_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-	payload JSONB NOT NULL,
-	handled BOOLEAN NOT NULL DEFAULT FALSE
+CREATE TABLE IF NOT EXISTS cells (
+	cell_id SERIAL PRIMARY KEY,
+	block_id INT NOT NULL REFERENCES cell_blocks(block_id) ON DELETE CASCADE,
+	cell_number TEXT NOT NULL,
+	capacity INT NOT NULL CHECK (capacity > 0),
+	status TEXT NOT NULL CHECK (status IN ('available','occupied','maintenance')) DEFAULT 'available',
+	UNIQUE (block_id, cell_number)
 );
 
--- Analytics staging table for EXPLAIN/optimization demos
-CREATE TABLE IF NOT EXISTS query_probes (
-	probe_id SERIAL PRIMARY KEY,
-	label TEXT NOT NULL,
-	sql_text TEXT NOT NULL,
-	plan JSONB,
-	duration_ms NUMERIC(10,3),
-	captured_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+-- Arrest records
+CREATE TABLE IF NOT EXISTS arrest_records (
+	arrest_id BIGSERIAL PRIMARY KEY,
+	criminal_id UUID NOT NULL REFERENCES criminals(criminal_id) ON DELETE CASCADE,
+	thana_id INT NOT NULL REFERENCES thanas(thana_id),
+	arrest_date DATE NOT NULL,
+	bail_due_date DATE,
+	custody_status TEXT NOT NULL CHECK (custody_status IN ('in_custody','on_bail','released','transferred')),
+	case_reference TEXT
 );
 
--- Materialized view placeholders are defined in views.sql to keep DDL modular
+-- Incarceration details
+CREATE TABLE IF NOT EXISTS incarcerations (
+	incarceration_id BIGSERIAL PRIMARY KEY,
+	arrest_id BIGINT NOT NULL REFERENCES arrest_records(arrest_id) ON DELETE CASCADE,
+	jail_id INT NOT NULL REFERENCES jails(jail_id),
+	cell_id INT REFERENCES cells(cell_id),
+	admitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	released_at TIMESTAMPTZ
+);
 
--- End of schema: tables are intentionally interconnected to showcase recursive CTEs,
--- window functions, temporal queries, and FTS—all reflected in grading docs.
+-- Bail records
+CREATE TABLE IF NOT EXISTS bail_records (
+	bail_id BIGSERIAL PRIMARY KEY,
+	arrest_id BIGINT NOT NULL REFERENCES arrest_records(arrest_id) ON DELETE CASCADE,
+	court_name TEXT NOT NULL,
+	bail_amount NUMERIC(12,2),
+	granted_at DATE,
+	surety_name TEXT,
+	status TEXT NOT NULL CHECK (status IN ('pending','granted','rejected')) DEFAULT 'pending'
+);
+
+-- Criminal locations (for public viewing by location)
+CREATE TABLE IF NOT EXISTS criminal_locations (
+	criminal_location_id BIGSERIAL PRIMARY KEY,
+	criminal_id UUID NOT NULL REFERENCES criminals(criminal_id) ON DELETE CASCADE,
+	location_id INT NOT NULL REFERENCES locations(location_id),
+	noted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

@@ -12,6 +12,14 @@ INSERT INTO agents (codename, full_name, rank_code, clearance_level) VALUES
 	('Pulse', 'Rami Idris', 'analyst', 7)
 ON CONFLICT DO NOTHING;
 
+-- HQ and admin user
+INSERT INTO headquarters (name, region) VALUES ('Central Command', 'Global')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO hq_users (hq_id, username, hashed_password, role)
+SELECT hq_id, 'overwatch', '$2b$10$placeholderhash', 'admin' FROM headquarters WHERE name='Central Command'
+ON CONFLICT DO NOTHING;
+
 INSERT INTO criminals (primary_name, nationality, risk_score, dossier) VALUES
 	('Lazar Vukovic', 'Serbian', 8.7, '{"signature":"uses burner satellites"}'),
 	('Mara El-Sayed', 'Egyptian', 9.1, '{"signature":"bio-agent smuggling"}'),
@@ -48,4 +56,16 @@ SELECT * FROM (
 		((SELECT incident_id FROM incidents WHERE title='Bio-agent transfer'), (SELECT criminal_id FROM criminals WHERE primary_name='Lazar Vukovic'), 'accomplice'),
 		((SELECT incident_id FROM incidents WHERE title='Cryptic ledger sync'), (SELECT criminal_id FROM criminals WHERE primary_name='Jun Park'), 'suspect')
 ) AS t(incident_id, criminal_id, role)
+ON CONFLICT DO NOTHING;
+
+-- Epstein file sample
+INSERT INTO epstein_files (title, summary, sensitivity_level, primary_criminal_id, related_incident_id, related_org_id)
+VALUES (
+	'Epstein File Alpha',
+	'Cross-border financial and bio-agent coordination dossier',
+	9,
+	(SELECT criminal_id FROM criminals WHERE primary_name='Mara El-Sayed'),
+	(SELECT incident_id FROM incidents WHERE title='Bio-agent transfer'),
+	NULL
+)
 ON CONFLICT DO NOTHING;

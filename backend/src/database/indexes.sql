@@ -20,3 +20,11 @@ CREATE INDEX IF NOT EXISTS idx_comm_content_vector ON communications USING GIN (
 
 -- Alerts queue for HQ WebSocket polling fallbacks (supports realtime_alerts.js)
 CREATE INDEX IF NOT EXISTS idx_alerts_handled ON alerts (handled, triggered_at DESC);
+
+-- HQ/admins and Epstein files
+CREATE INDEX IF NOT EXISTS idx_hq_users_hq ON hq_users (hq_id);
+CREATE INDEX IF NOT EXISTS idx_hq_users_agent ON hq_users (agent_id);
+CREATE INDEX IF NOT EXISTS idx_epstein_files_primary_criminal ON epstein_files(primary_criminal_id);
+CREATE INDEX IF NOT EXISTS idx_epstein_files_incident ON epstein_files(related_incident_id);
+CREATE INDEX IF NOT EXISTS idx_epstein_files_org ON epstein_files(related_org_id);
+CREATE INDEX IF NOT EXISTS idx_epstein_files_search ON epstein_files USING GIN (search_vector);
