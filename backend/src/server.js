@@ -85,10 +85,10 @@ attachListenerClient(process.env.ALERT_CHANNEL || 'incident_alerts', (payload) =
   // Server continues without real-time notifications
 });
 
-// Initialize socket behavior (heartbeats, client registry, etc.).
+// Initialize WebSocket
 createAlarmSocket.init(wss);
 
-const port = pWebSocket
+const port = process.env.PORT || 4000;
 server.listen(port, () => {
   console.log(`Jail Management System backend listening on port ${port}`);
 });
