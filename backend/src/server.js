@@ -21,16 +21,13 @@ import usersRoutes from './routes/users.js';
 import criminalLocationsRoutes from './routes/criminalLocations.js';
 import createAlarmSocket from './sockets/alarm.js';
 
-// .env drives pool tuning and alert channel name to keep DBA tweaks close to runtime
 dotenv.config();
 
 const app = express();
 app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
 app.use(express.json());
 
-// -----------------------------
-// Route wiring — every route uses raw SQL (no ORM)
-// -----------------------------
+// API Routes
 app.use('/api/criminals', criminalRoutes);
 app.use('/api/thanas', thanasRoutes);
 app.use('/api/officers', officersRoutes);
@@ -76,14 +73,11 @@ app.get('/api/dashboard/stats', async (_req, res) => {
   }
 });
 
-// -----------------------------
 // HTTP + WebSocket server
-// -----------------------------
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
-// Tie PostgreSQL LISTEN/NOTIFY to WebSocket clients.
-// The trigger in triggers.sql emits NOTIFY on channel ALERT_CHANNEL
+// PostgreSQL LISTEN/NOTIFY for real-time alerts
 attachListenerClient(process.env.ALERT_CHANNEL || 'incident_alerts', (payload) => {
   createAlarmSocket.broadcast(wss, payload);
 }).catch((err) => {
@@ -94,7 +88,7 @@ attachListenerClient(process.env.ALERT_CHANNEL || 'incident_alerts', (payload) =
 // Initialize socket behavior (heartbeats, client registry, etc.).
 createAlarmSocket.init(wss);
 
-const port = process.env.PORT || 4000;
+const port = pWebSocket
 server.listen(port, () => {
   console.log(`Jail Management System backend listening on port ${port}`);
 });

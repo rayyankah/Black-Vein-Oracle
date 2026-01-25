@@ -1,8 +1,6 @@
 import { Router } from 'express';
 import pool from '../database/connection.js';
 
-// Bail records management - matches schema
-
 const router = Router();
 
 // Get all bail records

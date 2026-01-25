@@ -1,8 +1,6 @@
 import { Router } from 'express';
 import pool from '../database/connection.js';
 
-// Incarceration management - demonstrates transactions and complex joins
-
 const router = Router();
 
 // Get all incarcerations

@@ -1,8 +1,6 @@
 import { Router } from 'express';
 import pool from '../database/connection.js';
 
-// Users (Citizens) routes - for GD report filing
-
 const router = Router();
 
 // Get all users

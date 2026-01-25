@@ -1,8 +1,6 @@
 import { Router } from 'express';
 import pool from '../database/connection.js';
 
-// GD Reports (General Diary) routes with raw SQL
-
 const router = Router();
 
 // Get all GD reports

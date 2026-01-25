@@ -1,8 +1,6 @@
 import { Router } from 'express';
 import pool from '../database/connection.js';
 
-// Criminals management with raw SQL - demonstrates FTS, indexes, and complex queries
-
 const router = Router();
 
 // Get all criminals

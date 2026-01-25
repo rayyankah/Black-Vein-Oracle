@@ -1,8 +1,6 @@
 import { Router } from 'express';
 import pool from '../database/connection.js';
 
-// Arrest records routes with raw SQL
-
 const router = Router();
 
 // Get all arrests

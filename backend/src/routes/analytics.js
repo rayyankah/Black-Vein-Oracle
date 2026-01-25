@@ -2,8 +2,6 @@ import { Router } from 'express';
 import pool from '../database/connection.js';
 import { getTimings } from '../utils/performance_logger.js';
 
-// Analytics endpoints for jail management system
-
 const router = Router();
 
 // Get query performance logs

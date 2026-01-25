@@ -1,8 +1,6 @@
 import { Router } from 'express';
 import pool from '../database/connection.js';
 
-// Criminal Locations routes - track criminal location history
-
 const router = Router();
 
 // Get all criminal locations (with criminal info)
