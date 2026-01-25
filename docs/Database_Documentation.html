@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bangladesh Jail & Thana Management System - Database Documentation</title>
+    <style>
+        /* ===== PRINT & SCREEN STYLING ===== */
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.7;
+            color: #2c3e50;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px;
+            background: #fff;
+        }
+        
+        /* ===== COVER PAGE ===== */
+        .cover-page {
+            text-align: center;
+            padding: 80px 20px;
+            page-break-after: always;
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .cover-page h1 {
+            font-size: 2.5em;
+            color: #1a5f7a;
+            margin-bottom: 10px;
+            border: none;
+        }
+        
+        .cover-page .subtitle {
+            font-size: 1.5em;
+            color: #34495e;
+            margin-bottom: 50px;
+        }
+        
+        .cover-info {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: left;
+        }
+        
+        .cover-info p {
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+        
+        .cover-info strong {
+            color: #1a5f7a;
+            display: inline-block;
+            width: 180px;
+        }
+        
+        /* ===== HEADERS ===== */
+        h1 {
+            color: #1a5f7a;
+            border-bottom: 3px solid #1a5f7a;
+            padding-bottom: 10px;
+            margin-top: 50px;
+            font-size: 1.8em;
+            page-break-after: avoid;
+        }
+        
+        h2 {
+            color: #2980b9;
+            margin-top: 35px;
+            font-size: 1.4em;
+            border-left: 4px solid #2980b9;
+            padding-left: 15px;
+            page-break-after: avoid;
+        }
+        
+        h3 {
+            color: #16a085;
+            margin-top: 25px;
+            font-size: 1.15em;
+            page-break-after: avoid;
+        }
+        
+        /* ===== TABLE OF CONTENTS ===== */
+        .toc {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 30px 0;
+            page-break-after: always;
+        }
+        
+        .toc h2 {
+            border-left: none;
+            padding-left: 0;
+            text-align: center;
+            color: #1a5f7a;
+        }
+        
+        .toc ol {
+            list-style: none;
+            padding: 0;
+            counter-reset: toc-counter;
+        }
+        
+        .toc > ol > li {
+            margin: 15px 0;
+            padding: 10px 15px;
+            background: #fff;
+            border-radius: 5px;
+            border-left: 3px solid #2980b9;
+            counter-increment: toc-counter;
+        }
+        
+        .toc > ol > li::before {
+            content: counter(toc-counter) ". ";
+            font-weight: bold;
+            color: #1a5f7a;
+        }
+        
+        .toc a {
+            color: #2c3e50;
+            text-decoration: none;
+        }
+        
+        /* ===== TABLES ===== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.9em;
+            page-break-inside: avoid;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #1a5f7a 0%, #2980b9 100%);
+            color: white;
+            padding: 12px 10px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        tr:hover {
+            background: #e8f4f8;
+        }
+        
+        /* ===== CODE BLOCKS ===== */
+        pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.85em;
+            line-height: 1.5;
+            margin: 20px 0;
+            page-break-inside: avoid;
+        }
+        
+        code {
+            font-family: 'Consolas', 'Courier New', monospace;
+            background: #e8e8e8;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+        }
+        
+        /* SQL Keywords */
+        .keyword { color: #569cd6; font-weight: bold; }
+        .string { color: #ce9178; }
+        .comment { color: #6a9955; font-style: italic; }
+        .function { color: #dcdcaa; }
+        .number { color: #b5cea8; }
+        
+        /* ===== EXPLANATION BOXES ===== */
+        .explanation {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-left: 4px solid #27ae60;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .explanation h4 {
+            color: #27ae60;
+            margin: 0 0 10px 0;
+            font-size: 1em;
+        }
+        
+        .explanation p, .explanation ul {
+            margin: 5px 0;
+            color: #2c3e50;
+        }
+        
+        /* ===== INFO BOXES ===== */
+        .info-box {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-left: 4px solid #2196f3;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+            border-left: 4px solid #ff9800;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        /* ===== LISTS ===== */
+        ul, ol {
+            padding-left: 25px;
+        }
+        
+        li {
+            margin: 8px 0;
+        }
+        
+        /* ===== SECTION DIVIDER ===== */
+        hr {
+            border: none;
+            height: 2px;
+            background: linear-gradient(90deg, #1a5f7a, #2980b9, #1a5f7a);
+            margin: 40px 0;
+        }
+        
+        /* ===== PAGE BREAKS ===== */
+        .page-break {
+            page-break-before: always;
+        }
+        
+        /* ===== FOOTER ===== */
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        
+        /* ===== PRINT SPECIFIC ===== */
+        @media print {
+            body {
+                padding: 0;
+                font-size: 11pt;
+            }
+            
+            pre {
+                font-size: 9pt;
+                padding: 15px;
+            }
+            
+            .cover-page {
+                min-height: 100vh;
+            }
+            
+            h1, h2, h3 {
+                page-break-after: avoid;
+            }
+            
+            table, pre, .explanation, .info-box {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ==================== COVER PAGE ==================== -->
+<div class="cover-page">
+    <h1>Bangladesh Jail & Thana Management System</h1>
+    <p class="subtitle">Database Design Documentation</p>
+    
+    <div class="cover-info">
+        <p><strong>Course:</strong> Database Management Systems</p>
+        <p><strong>Project Title:</strong> Jail and Thana (Police Station) Management System</p>
+        <p><strong>Technology Stack:</strong> PostgreSQL 18 + Node.js + React (PERN Stack)</p>
+        <p><strong>Database:</strong> black_vein_oracle (PostgreSQL)</p>
+        <p><strong>Total Tables:</strong> 18 Tables</p>
+        <p><strong>Views:</strong> 7 Database Views</p>
+        <p><strong>Triggers:</strong> 5 Automated Triggers</p>
+        <p><strong>Indexes:</strong> 27 Performance Indexes</p>
+    </div>
+    
+    <p style="margin-top: 50px; color: #7f8c8d;">Academic Evaluation Document</p>
+</div>
+
+<!-- ==================== TABLE OF CONTENTS ==================== -->
+<div class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+        <li><a href="#section1">Project Overview</a></li>
+        <li><a href="#section2">Database Schema Analysis</a></li>
+        <li><a href="#section3">Table Descriptions (18 Tables)</a></li>
+        <li><a href="#section4">Relationships and Constraints</a></li>
+        <li><a href="#section5">Database Connection Code</a></li>
+        <li><a href="#section6">Views Implementation</a></li>
+        <li><a href="#section7">Triggers Implementation</a></li>
+        <li><a href="#section8">Indexes and Optimization</a></li>
+        <li><a href="#section9">Sample Queries</a></li>
+    </ol>
+</div>
+
+<!-- ==================== SECTION 1: PROJECT OVERVIEW ==================== -->
+<h1 id="section1">1. Project Overview</h1>
+
+<h2>1.1 Introduction</h2>
+<p>This project implements a comprehensive database management system for managing jail facilities and police stations (thanas) in Bangladesh. The system tracks criminals, arrests, incarcerations, bail records, and allows citizens to submit General Diary (GD) reports online.</p>
+
+<h2>1.2 System Objectives</h2>
+<ul>
+    <li>Manage police stations (thanas) across different districts</li>
+    <li>Track police officers and their assignments</li>
+    <li>Maintain criminal records with risk assessment</li>
+    <li>Record arrest and incarceration details</li>
+    <li>Manage jail facilities, cell blocks, and individual cells</li>
+    <li>Allow citizens to submit GD reports online</li>
+    <li>Track criminal organizations and networks</li>
+    <li>Manage bail records and court proceedings</li>
+</ul>
+
+<h2>1.3 User Roles</h2>
+<table>
+    <tr>
+        <th>Role</th>
+        <th>Description</th>
+        <th>Permissions</th>
+    </tr>
+    <tr>
+        <td><strong>Admin</strong></td>
+        <td>Government officials from Ministry of Home Affairs</td>
+        <td>Create thanas, assign officers, full system access</td>
+    </tr>
+    <tr>
+        <td><strong>Officer</strong></td>
+        <td>Police personnel at thanas</td>
+        <td>Manage criminals, arrests, cases, approve GD reports</td>
+    </tr>
+    <tr>
+        <td><strong>User</strong></td>
+        <td>Citizens with registered accounts</td>
+        <td>Submit GD reports, view public criminal information</td>
+    </tr>
+</table>
+
+<hr>
+
+<!-- ==================== SECTION 2: SCHEMA ANALYSIS ==================== -->
+<h1 id="section2" class="page-break">2. Database Schema Analysis</h1>
+
+<h2>2.1 Schema Design Principles</h2>
+<ol>
+    <li><strong>Third Normal Form (3NF):</strong> All tables are normalized to eliminate redundancy</li>
+    <li><strong>Referential Integrity:</strong> Foreign keys ensure data consistency across tables</li>
+    <li><strong>UUID Primary Keys:</strong> Used for sensitive entities (admin, officers, criminals) for security</li>
+    <li><strong>SERIAL Primary Keys:</strong> Used for simpler entities (locations, jails, cells)</li>
+    <li><strong>Check Constraints:</strong> Enforce business rules at database level</li>
+    <li><strong>Timestamps:</strong> Track creation and modification times</li>
+</ol>
+
+<h2>2.2 Data Types Used</h2>
+<table>
+    <tr>
+        <th>Data Type</th>
+        <th>Usage</th>
+        <th>Example</th>
+    </tr>
+    <tr>
+        <td><code>UUID</code></td>
+        <td>Unique identifiers for security-sensitive data</td>
+        <td>criminal_id, officer_id</td>
+    </tr>
+    <tr>
+        <td><code>SERIAL</code></td>
+        <td>Auto-incrementing integers</td>
+        <td>thana_id, jail_id</td>
+    </tr>
+    <tr>
+        <td><code>TEXT</code></td>
+        <td>Variable-length strings</td>
+        <td>names, addresses</td>
+    </tr>
+    <tr>
+        <td><code>INT</code></td>
+        <td>Integer values</td>
+        <td>capacity, risk_level</td>
+    </tr>
+    <tr>
+        <td><code>NUMERIC(12,2)</code></td>
+        <td>Currency/decimal values</td>
+        <td>bail_amount</td>
+    </tr>
+    <tr>
+        <td><code>DATE</code></td>
+        <td>Date only</td>
+        <td>arrest_date</td>
+    </tr>
+    <tr>
+        <td><code>TIMESTAMPTZ</code></td>
+        <td>Timestamp with timezone</td>
+        <td>submitted_at</td>
+    </tr>
+</table>
+
+<hr>
+
+<!-- ==================== SECTION 3: TABLE DESCRIPTIONS ==================== -->
+<h1 id="section3" class="page-break">3. Table Descriptions</h1>
+
+<h2>3.1 Admin Table</h2>
+<p><strong>Purpose:</strong> Stores government administrator information who manage the entire system.</p>
+
+<pre><code><span class="keyword">CREATE TABLE IF NOT EXISTS</span> admin (
+    admin_id <span class="function">UUID</span> <span class="keyword">PRIMARY KEY DEFAULT</span> <span class="function">gen_random_uuid()</span>,
+    full_name <span class="function">TEXT</span> <span class="keyword">NOT NULL</span>,
+    email <span class="function">TEXT</span> <span class="keyword">NOT NULL UNIQUE</span>
+);</code></pre>
+
+<div class="explanation">
+    <h4>What This Code Does:</h4>
+    <ul>
+        <li><strong>admin_id UUID:</strong> Creates a unique ID using UUID format. The <code>gen_random_uuid()</code> function automatically generates a random unique ID when a new admin is added.</li>
+        <li><strong>PRIMARY KEY:</strong> Ensures each admin has a unique identifier that can't be duplicated.</li>
+        <li><strong>NOT NULL:</strong> The full_name field must have a value - it cannot be empty.</li>
+        <li><strong>UNIQUE:</strong> The email must be unique across all admins - no duplicate emails allowed.</li>
+    </ul>
+</div>
+
+<h2>3.2 Thanas Table</h2>
+<p><strong>Purpose:</strong> Stores information about police stations across Bangladesh.</p>
+
+<pre><code><span class="keyword">CREATE TABLE IF NOT EXISTS</span> thanas (
+    thana_id <span class="function">SERIAL</span> <span class="keyword">PRIMARY KEY</span>,
+    name <span class="function">TEXT</span> <span class="keyword">NOT NULL</span>,
+    district <span class="function">TEXT</span> <span class="keyword">NOT NULL</span>,
+    address <span class="function">TEXT</span> <span class="keyword">NOT NULL</span>,
+    created_by_admin_id <span class="function">UUID</span> <span class="keyword">NOT NULL REFERENCES</span> admin(admin_id),
+    head_officer_id <span class="function">UUID</span>
+);</code></pre>
+
+<div class="explanation">
+    <h4>What This Code Does:</h4>
+    <ul>
+        <li><strong>SERIAL:</strong> Auto-incrementing integer (1, 2, 3...) - PostgreSQL automatically assigns the next number.</li>
+        <li><strong>REFERENCES admin(admin_id):</strong> This is a Foreign Key - it links to the admin table. Only existing admin IDs can be used here.</li>
+        <li><strong>head_officer_id:</strong> Optional field (no NOT NULL) - a thana might not have a head officer assigned yet.</li>
+    </ul>
+</div>
+
+<h2>3.3 Ranks Table</h2>
+<p><strong>Purpose:</strong> Lookup table for police officer ranks in Bangladesh Police hierarchy.</p>
+
+<pre><code><span class="keyword">CREATE TABLE IF NOT EXISTS</span> ranks (
+    rank_code <span class="function">TEXT</span> <span class="keyword">PRIMARY KEY</span>,
+    rank_name <span class="function">TEXT</span> <span class="keyword">NOT NULL</span>,
+    level <span class="function">INT</span> <span class="keyword">NOT NULL CHECK</span> (level >= <span class="number">1</span>)
+);
+
+<span class="keyword">INSERT INTO</span> ranks (rank_code, rank_name, level) <span class="keyword">VALUES</span>
+    (<span class="string">'constable'</span>, <span class="string">'Constable'</span>, <span class="number">1</span>),
+    (<span class="string">'si'</span>, <span class="string">'Sub-Inspector'</span>, <span class="number">2</span>),
+    (<span class="string">'inspector'</span>, <span class="string">'Inspector'</span>, <span class="number">3</span>),
+    (<span class="string">'oc'</span>, <span class="string">'Officer-in-Charge'</span>, <span class="number">4</span>)
+<span class="keyword">ON CONFLICT DO NOTHING</span>;</code></pre>
+
+<div class="explanation">
+    <h4>What This Code Does:</h4>
+    <ul>
+        <li><strong>CHECK (level >= 1):</strong> A constraint that ensures the level value is always 1 or higher. If you try to insert 0 or negative, it fails.</li>
+        <li><strong>ON CONFLICT DO NOTHING:</strong> If the data already exists, skip the insert instead of throwing an error. Useful for running the script multiple times.</li>
+        <li><strong>TEXT as PRIMARY KEY:</strong> Using meaningful text like 'si' or 'oc' makes foreign key values readable.</li>
+    </ul>
+</div>
+
+<h2>3.4 Officers Table</h2>
+<p><strong>Purpose:</strong> Stores police officer information with thana assignments.</p>
+
+<pre><code><span class="keyword">CREATE TABLE IF NOT EXISTS</span> officers (
+    officer_id <span class="function">UUID</span> <span class="keyword">PRIMARY KEY DEFAULT</span> <span class="function">gen_random_uuid()</span>,
+    thana_id <span class="function">INT</span> <span class="keyword">NOT NULL REFERENCES</span> thanas(thana_id) <span class="keyword">ON DELETE CASCADE</span>,
+    rank_code <span class="function">TEXT</span> <span class="keyword">NOT NULL REFERENCES</span> ranks(rank_code),
+    full_name <span class="function">TEXT</span> <span class="keyword">NOT NULL</span>,
+    badge_no <span class="function">TEXT</span> <span class="keyword">NOT NULL UNIQUE</span>
+);</code></pre>
+
+<div class="explanation">
+    <h4>What This Code Does:</h4>
+    <ul>
+        <li><strong>ON DELETE CASCADE:</strong> When a thana is deleted, all officers assigned to that thana are automatically deleted too. This maintains data integrity.</li>
+        <li><strong>REFERENCES thanas(thana_id):</strong> Foreign key ensuring officers can only be assigned to existing thanas.</li>
+        <li><strong>badge_no UNIQUE:</strong> Every officer must have a unique badge number.</li>
+    </ul>
+</div>
+
+<h2>3.5 Users Table</h2>
+<p><strong>Purpose:</strong> Citizen accounts for online GD report submission.</p>
+
+<pre><code><span class="keyword">CREATE TABLE IF NOT EXISTS</span> users (
+    user_id <span class="function">UUID</span> <span class="keyword">PRIMARY KEY DEFAULT</span> <span class="function">gen_random_uuid()</span>,
+    full_name <span class="function">TEXT</span> <span class="keyword">NOT NULL</span>,
+    nid_number <span class="function">TEXT</span> <span class="keyword">NOT NULL UNIQUE</span>,
+    phone <span class="function">TEXT</span> <span class="keyword">NOT NULL</span>,
+    address <span class="function">TEXT</span>,
+    email <span class="function">TEXT</span> <span class="keyword">NOT NULL UNIQUE</span>,
+    password_hash <span class="function">TEXT</span> <span class="keyword">NOT NULL</span>
+);</code></pre>
+
+<div class="explanation">
+    <h4>What This Code Does:</h4>
+    <ul>
+        <li><strong>nid_number UNIQUE:</strong> Each citizen's National ID must be unique - prevents duplicate registrations.</li>
+        <li><strong>password_hash:</strong> Stores the encrypted password (using bcrypt), never plain text for security.</li>
+        <li><strong>address TEXT:</strong> No NOT NULL constraint means this field is optional.</li>
+    </ul>
+</div>
+
+<h2>3.6 GD Reports Table</h2>
+<p><strong>Purpose:</strong> General Diary entries submitted by citizens online.</p>
+
+<pre><code><span class="keyword">CREATE TABLE IF NOT EXISTS</span> gd_reports (
+    gd_id <span class="function">BIGSERIAL</span> <span class="keyword">PRIMARY KEY</span>,
+    user_id <span class="function">UUID</span> <span class="keyword">NOT NULL REFERENCES</span> users(user_id) <span class="keyword">ON DELETE CASCADE</span>,
+    thana_id <span class="function">INT</span> <span class="keyword">NOT NULL REFERENCES</span> thanas(thana_id),
+    submitted_at <span class="function">TIMESTAMPTZ</span> <span class="keyword">NOT NULL DEFAULT</span> <span class="function">NOW()</span>,
+    description <span class="function">TEXT</span> <span class="keyword">NOT NULL</span>,
+    status <span class="function">TEXT</span> <span class="keyword">NOT NULL CHECK</span> (status <span class="keyword">IN</span> (<span class="string">'submitted'</span>,<span class="string">'approved'</span>,<span class="string">'rejected'</span>))
+        <span class="keyword">DEFAULT</span> <span class="string">'submitted'</span>,
+    approved_by_officer_id <span class="function">UUID</span> <span class="keyword">REFERENCES</span> officers(officer_id)
+);</code></pre>
+
+<div class="explanation">
+    <h4>What This Code Does:</h4>
+    <ul>
+        <li><strong>BIGSERIAL:</strong> Like SERIAL but can store much larger numbers (for tables expecting millions of rows).</li>
+        <li><strong>DEFAULT NOW():</strong> Automatically sets the current date/time when a new record is inserted.</li>
+        <li><strong>CHECK (status IN (...)):</strong> Only allows these three specific values - any other value will be rejected.</li>
+        <li><strong>DEFAULT 'submitted':</strong> New GD reports automatically start with 'submitted' status.</li>
+    </ul>
+</div>
+
+<h2 class="page-break">3.7 Criminals Table</h2>
+<p><strong>Purpose:</strong> Master record of known criminals with risk assessment.</p>
+
+<pre><code><span class="keyword">CREATE TABLE IF NOT EXISTS</span> criminals (
+    criminal_id <span class="function">UUID</span> <span class="keyword">PRIMARY KEY DEFAULT</span> <span class="function">gen_random_uuid()</span>,
+    full_name <span class="function">TEXT</span> <span class="keyword">NOT NULL</span>,
+    nid_or_alias <span class="function">TEXT</span>,
+    status <span class="function">TEXT</span> <span class="keyword">NOT NULL CHECK</span> (status <span class="keyword">IN</span>
+        (<span class="string">'in_custody'</span>,<span class="string">'on_bail'</span>,<span class="string">'released'</span>,<span class="string">'escaped'</span>,<span class="string">'unknown'</span>)) <span class="keyword">DEFAULT</span> <span class="string">'unknown'</span>,
+    risk_level <span class="function">INT</span> <span class="keyword">NOT NULL CHECK</span> (risk_level <span class="keyword">BETWEEN</span> <span class="number">1</span> <span class="keyword">AND</span> <span class="number">10</span>) <span class="keyword">DEFAULT</span> <span class="number">1</span>,
+    registered_thana_id <span class="function">INT</span> <span class="keyword">REFERENCES</span> thanas(thana_id)
+);</code></pre>
+
+<div class="explanation">
+    <h4>What This Code Does:</h4>
+    <ul>
+        <li><strong>CHECK (risk_level BETWEEN 1 AND 10):</strong> Risk level must be a number from 1 to 10 - enforces valid range.</li>
+        <li><strong>Status values:</strong> in_custody (in jail), on_bail (released on bail), released (sentence done), escaped (prison break), unknown (default)</li>
+    </ul>
+</div>
+
+<h2>3.8 Organizations Table</h2>
+<p><strong>Purpose:</strong> Criminal organizations/gangs database.</p>
+
+<pre><code><span class="keyword">CREATE TABLE IF NOT EXISTS</span> organizations (
+    org_id <span class="function">UUID</span> <span class="keyword">PRIMARY KEY DEFAULT</span> <span class="function">gen_random_uuid()</span>,
+    name <span class="function">TEXT</span> <span class="keyword">NOT NULL UNIQUE</span>,
+    ideology <span class="function">TEXT</span>,
+    threat_level <span class="function">INT</span> <span class="keyword">NOT NULL CHECK</span> (threat_level <span class="keyword">BETWEEN</span> <span class="number">1</span> <span class="keyword">AND</span> <span class="number">10</span>),
+    created_at <span class="function">TIMESTAMPTZ</span> <span class="keyword">NOT NULL DEFAULT</span> <span class="function">NOW()</span>
+);</code></pre>
+
+<h2>3.9 Criminal Organizations (Junction Table)</h2>
+<p><strong>Purpose:</strong> Many-to-many relationship between criminals and organizations.</p>
+
+<pre><code><span class="keyword">CREATE TABLE IF NOT EXISTS</span> criminal_organizations (
+    criminal_id <span class="function">UUID</span> <span class="keyword">NOT NULL REFERENCES</span> criminals(criminal_id) <span class="keyword">ON DELETE CASCADE</span>,
+    org_id <span class="function">UUID</span> <span class="keyword">NOT NULL REFERENCES</span> organizations(org_id) <span class="keyword">ON DELETE CASCADE</span>,
+    role <span class="function">TEXT</span>,
+    <span class="keyword">PRIMARY KEY</span> (criminal_id, org_id)
+);</code></pre>
+
+<div class="explanation">
+    <h4>What This Code Does:</h4>
+    <ul>
+        <li><strong>Junction Table:</strong> Links criminals to organizations (many-to-many relationship).</li>
+        <li><strong>Composite PRIMARY KEY:</strong> The combination (criminal_id, org_id) is unique - a criminal can only have one entry per organization.</li>
+        <li><strong>role:</strong> Stores what role the criminal has in the organization (leader, member, etc.).</li>
+    </ul>
+</div>
+
+<h2>3.10 Criminal Relations Table</h2>
+<p><strong>Purpose:</strong> Self-referential relationship tracking criminal networks.</p>
+
+<pre><code><span class="keyword">CREATE TABLE IF NOT EXISTS</span> criminal_relations (
+    relation_id <span class="function">SERIAL</span> <span class="keyword">PRIMARY KEY</span>,
+    criminal_id_1 <span class="function">UUID</span> <span class="keyword">NOT NULL REFERENCES</span> criminals(criminal_id) <span class="keyword">ON DELETE CASCADE</span>,
+    criminal_id_2 <span class="function">UUID</span> <span class="keyword">NOT NULL REFERENCES</span> criminals(criminal_id) <span class="keyword">ON DELETE CASCADE</span>,
+    relation_type <span class="function">TEXT</span> <span class="keyword">NOT NULL CHECK</span>
+        (relation_type <span class="keyword">IN</span> (<span class="string">'associate'</span>,<span class="string">'family'</span>,<span class="string">'financial'</span>,<span class="string">'accomplice'</span>)),
+    <span class="keyword">CHECK</span> (criminal_id_1 <> criminal_id_2),
+    <span class="keyword">UNIQUE</span> (criminal_id_1, criminal_id_2, relation_type)
+);</code></pre>
+
+<div class="explanation">
+    <h4>What This Code Does:</h4>
+    <ul>
+        <li><strong>Self-referential:</strong> Both foreign keys point to the same table (criminals) - links one criminal to another.</li>
+        <li><strong>CHECK (criminal_id_1 &lt;&gt; criminal_id_2):</strong> Prevents a criminal from being related to themselves.</li>
+        <li><strong>UNIQUE constraint:</strong> Same pair of criminals can't have the same relation type twice.</li>
+    </ul>
+</div>
+
+<h2>3.11 Case Files Table</h2>
+<pre><code><span class="keyword">CREATE TABLE IF NOT EXISTS</span> case_files (
+    case_id <span class="function">BIGSERIAL</span> <span class="keyword">PRIMARY KEY</span>,
+    case_number <span class="function">TEXT</span> <span class="keyword">NOT NULL UNIQUE</span>,
+    criminal_id <span class="function">UUID</span> <span class="keyword">NOT NULL REFERENCES</span> criminals(criminal_id) <span class="keyword">ON DELETE CASCADE</span>,
+    thana_id <span class="function">INT</span> <span class="keyword">NOT NULL REFERENCES</span> thanas(thana_id),
+    case_type <span class="function">TEXT</span> <span class="keyword">NOT NULL</span>,
+    status <span class="function">TEXT</span> <span class="keyword">NOT NULL CHECK</span> (status <span class="keyword">IN</span> (<span class="string">'open'</span>,<span class="string">'investigating'</span>,<span class="string">'closed'</span>))
+        <span class="keyword">DEFAULT</span> <span class="string">'open'</span>,
+    filed_at <span class="function">TIMESTAMPTZ</span> <span class="keyword">NOT NULL DEFAULT</span> <span class="function">NOW()</span>
+);</code></pre>
+
+<h2>3.12 Jails Table</h2>
+<pre><code><span class="keyword">CREATE TABLE IF NOT EXISTS</span> jails (
+    jail_id <span class="function">SERIAL</span> <span class="keyword">PRIMARY KEY</span>,
+    name <span class="function">TEXT</span> <span class="keyword">NOT NULL</span>,
+    district <span class="function">TEXT</span> <span class="keyword">NOT NULL</span>,
+    address <span class="function">TEXT</span> <span class="keyword">NOT NULL</span>,
+    capacity <span class="function">INT</span> <span class="keyword">NOT NULL CHECK</span> (capacity > <span class="number">0</span>)
+);</code></pre>
+
+<h2>3.13 Cell Blocks Table</h2>
+<pre><code><span class="keyword">CREATE TABLE IF NOT EXISTS</span> cell_blocks (
+    block_id <span class="function">SERIAL</span> <span class="keyword">PRIMARY KEY</span>,
+    jail_id <span class="function">INT</span> <span class="keyword">NOT NULL REFERENCES</span> jails(jail_id) <span class="keyword">ON DELETE CASCADE</span>,
+    block_name <span class="function">TEXT</span> <span class="keyword">NOT NULL</span>,
+    capacity <span class="function">INT</span> <span class="keyword">NOT NULL CHECK</span> (capacity > <span class="number">0</span>)
+);</code></pre>
+
+<h2>3.14 Cells Table</h2>
+<pre><code><span class="keyword">CREATE TABLE IF NOT EXISTS</span> cells (
+    cell_id <span class="function">SERIAL</span> <span class="keyword">PRIMARY KEY</span>,
+    block_id <span class="function">INT</span> <span class="keyword">NOT NULL REFERENCES</span> cell_blocks(block_id) <span class="keyword">ON DELETE CASCADE</span>,
+    cell_number <span class="function">TEXT</span> <span class="keyword">NOT NULL</span>,
+    capacity <span class="function">INT</span> <span class="keyword">NOT NULL CHECK</span> (capacity > <span class="number">0</span>),
+    status <span class="function">TEXT</span> <span class="keyword">NOT NULL CHECK</span> (status <span class="keyword">IN</span> (<span class="string">'available'</span>,<span class="string">'occupied'</span>,<span class="string">'maintenance'</span>))
+        <span class="keyword">DEFAULT</span> <span class="string">'available'</span>,
+    <span class="keyword">UNIQUE</span> (block_id, cell_number)
+);</code></pre>
+
+<div class="explanation">
+    <h4>What This Code Does:</h4>
+    <ul>
+        <li><strong>UNIQUE (block_id, cell_number):</strong> Cell numbers are unique within each block (Block A can have Cell 1, Block B can also have Cell 1).</li>
+        <li><strong>Jail Hierarchy:</strong> Jails contain Cell Blocks, Cell Blocks contain Cells (parent-child relationships).</li>
+    </ul>
+</div>
+
+<h2 class="page-break">3.15 Arrest Records Table</h2>
+<pre><code><span class="keyword">CREATE TABLE IF NOT EXISTS</span> arrest_records (
+    arrest_id <span class="function">BIGSERIAL</span> <span class="keyword">PRIMARY KEY</span>,
+    criminal_id <span class="function">UUID</span> <span class="keyword">NOT NULL REFERENCES</span> criminals(criminal_id) <span class="keyword">ON DELETE CASCADE</span>,
+    thana_id <span class="function">INT</span> <span class="keyword">NOT NULL REFERENCES</span> thanas(thana_id),
+    arrest_date <span class="function">DATE</span> <span class="keyword">NOT NULL</span>,
+    bail_due_date <span class="function">DATE</span>,
+    custody_status <span class="function">TEXT</span> <span class="keyword">NOT NULL CHECK</span>
+        (custody_status <span class="keyword">IN</span> (<span class="string">'in_custody'</span>,<span class="string">'on_bail'</span>,<span class="string">'released'</span>,<span class="string">'transferred'</span>)),
+    case_reference <span class="function">TEXT</span>
+);</code></pre>
+
+<h2>3.16 Incarcerations Table</h2>
+<pre><code><span class="keyword">CREATE TABLE IF NOT EXISTS</span> incarcerations (
+    incarceration_id <span class="function">BIGSERIAL</span> <span class="keyword">PRIMARY KEY</span>,
+    arrest_id <span class="function">BIGINT</span> <span class="keyword">NOT NULL REFERENCES</span> arrest_records(arrest_id) <span class="keyword">ON DELETE CASCADE</span>,
+    jail_id <span class="function">INT</span> <span class="keyword">NOT NULL REFERENCES</span> jails(jail_id),
+    cell_id <span class="function">INT</span> <span class="keyword">REFERENCES</span> cells(cell_id),
+    admitted_at <span class="function">TIMESTAMPTZ</span> <span class="keyword">NOT NULL DEFAULT</span> <span class="function">NOW()</span>,
+    released_at <span class="function">TIMESTAMPTZ</span>
+);</code></pre>
+
+<div class="explanation">
+    <h4>What This Code Does:</h4>
+    <ul>
+        <li><strong>released_at:</strong> NULL if still in jail, has a date when released.</li>
+        <li><strong>Links:</strong> Connects arrests to jail assignments - tracks where each arrested person is held.</li>
+    </ul>
+</div>
+
+<h2>3.17 Bail Records Table</h2>
+<pre><code><span class="keyword">CREATE TABLE IF NOT EXISTS</span> bail_records (
+    bail_id <span class="function">BIGSERIAL</span> <span class="keyword">PRIMARY KEY</span>,
+    arrest_id <span class="function">BIGINT</span> <span class="keyword">NOT NULL REFERENCES</span> arrest_records(arrest_id) <span class="keyword">ON DELETE CASCADE</span>,
+    court_name <span class="function">TEXT</span> <span class="keyword">NOT NULL</span>,
+    bail_amount <span class="function">NUMERIC(12,2)</span>,
+    granted_at <span class="function">DATE</span>,
+    surety_name <span class="function">TEXT</span>,
+    status <span class="function">TEXT</span> <span class="keyword">NOT NULL CHECK</span> (status <span class="keyword">IN</span> (<span class="string">'pending'</span>,<span class="string">'granted'</span>,<span class="string">'rejected'</span>))
+        <span class="keyword">DEFAULT</span> <span class="string">'pending'</span>
+);</code></pre>
+
+<div class="explanation">
+    <h4>What This Code Does:</h4>
+    <ul>
+        <li><strong>NUMERIC(12,2):</strong> Can store up to 12 digits with 2 decimal places - suitable for currency (BDT).</li>
+        <li><strong>surety_name:</strong> The guarantor who signs for the bail.</li>
+    </ul>
+</div>
+
+<h2>3.18 Criminal Locations Table</h2>
+<pre><code><span class="keyword">CREATE TABLE IF NOT EXISTS</span> criminal_locations (
+    criminal_location_id <span class="function">BIGSERIAL</span> <span class="keyword">PRIMARY KEY</span>,
+    criminal_id <span class="function">UUID</span> <span class="keyword">NOT NULL REFERENCES</span> criminals(criminal_id) <span class="keyword">ON DELETE CASCADE</span>,
+    location_id <span class="function">INT</span> <span class="keyword">NOT NULL REFERENCES</span> locations(location_id),
+    noted_at <span class="function">TIMESTAMPTZ</span> <span class="keyword">NOT NULL DEFAULT</span> <span class="function">NOW()</span>
+);</code></pre>
+
+<div class="explanation">
+    <h4>What This Code Does:</h4>
+    <ul>
+        <li><strong>Purpose:</strong> Tracks historical locations where criminals were spotted.</li>
+        <li><strong>noted_at:</strong> Records exactly when the criminal was seen at that location.</li>
+    </ul>
+</div>
+
+<hr>
+
+<!-- ==================== SECTION 4: RELATIONSHIPS ==================== -->
+<h1 id="section4" class="page-break">4. Relationships and Constraints</h1>
+
+<h2>4.1 Foreign Key Relationships</h2>
+
+<div class="info-box">
+    <p><strong>Understanding Foreign Keys:</strong> A foreign key is a column that references the primary key of another table. It ensures data integrity by only allowing values that exist in the referenced table.</p>
+</div>
+
+<pre><code><span class="comment">-- Admin creates Thanas</span>
+thanas.created_by_admin_id → admin.admin_id
+
+<span class="comment">-- Thana has head officer (circular reference)</span>
+thanas.head_officer_id → officers.officer_id
+
+<span class="comment">-- Officers belong to Thanas</span>
+officers.thana_id → thanas.thana_id (<span class="keyword">ON DELETE CASCADE</span>)
+
+<span class="comment">-- Users submit GD Reports</span>
+gd_reports.user_id → users.user_id (<span class="keyword">ON DELETE CASCADE</span>)
+
+<span class="comment">-- Criminals registered at Thanas</span>
+criminals.registered_thana_id → thanas.thana_id
+
+<span class="comment">-- Criminal-Organization junction (Many-to-Many)</span>
+criminal_organizations.criminal_id → criminals.criminal_id
+criminal_organizations.org_id → organizations.org_id
+
+<span class="comment">-- Jail hierarchy</span>
+cell_blocks.jail_id → jails.jail_id (<span class="keyword">ON DELETE CASCADE</span>)
+cells.block_id → cell_blocks.block_id (<span class="keyword">ON DELETE CASCADE</span>)</code></pre>
+
+<h2>4.2 Check Constraints Summary</h2>
+<table>
+    <tr>
+        <th>Table</th>
+        <th>Constraint</th>
+        <th>Rule</th>
+    </tr>
+    <tr>
+        <td>ranks</td>
+        <td>level >= 1</td>
+        <td>Rank level must be positive</td>
+    </tr>
+    <tr>
+        <td>criminals</td>
+        <td>risk_level BETWEEN 1 AND 10</td>
+        <td>Risk score range</td>
+    </tr>
+    <tr>
+        <td>organizations</td>
+        <td>threat_level BETWEEN 1 AND 10</td>
+        <td>Threat score range</td>
+    </tr>
+    <tr>
+        <td>criminal_relations</td>
+        <td>criminal_id_1 &lt;&gt; criminal_id_2</td>
+        <td>No self-relations</td>
+    </tr>
+    <tr>
+        <td>jails, cell_blocks, cells</td>
+        <td>capacity > 0</td>
+        <td>Positive capacity required</td>
+    </tr>
+</table>
+
+<hr>
+
+<!-- ==================== SECTION 5: CONNECTION CODE ==================== -->
+<h1 id="section5" class="page-break">5. Database Connection Code</h1>
+
+<h2>5.1 Connection Configuration</h2>
+<p><strong>File:</strong> <code>backend/src/database/connection.js</code></p>
+
+<pre><code><span class="keyword">import</span> dotenv <span class="keyword">from</span> <span class="string">"dotenv"</span>;
+<span class="keyword">import</span> pkg <span class="keyword">from</span> <span class="string">"pg"</span>;
+
+<span class="comment">// Load environment variables from .env file</span>
+dotenv.config();
+
+<span class="comment">// Destructure Pool from pg package</span>
+<span class="keyword">const</span> { Pool } = pkg;
+
+<span class="comment">// Create connection pool with configuration</span>
+<span class="keyword">export const</span> pool = <span class="keyword">new</span> <span class="function">Pool</span>({
+    host: process.env.PGHOST,                  <span class="comment">// Database server hostname</span>
+    port: <span class="function">Number</span>(process.env.PGPORT) || <span class="number">5432</span>,  <span class="comment">// PostgreSQL port</span>
+    user: process.env.PGUSER,                  <span class="comment">// Database username</span>
+    password: process.env.PGPASSWORD,          <span class="comment">// Database password</span>
+    database: process.env.PGDATABASE,          <span class="comment">// Database name</span>
+    min: <span class="function">Number</span>(process.env.PGPOOL_MIN) || <span class="number">2</span>,  <span class="comment">// Minimum pool connections</span>
+    max: <span class="function">Number</span>(process.env.PGPOOL_MAX) || <span class="number">10</span>, <span class="comment">// Maximum pool connections</span>
+    idleTimeoutMillis: <span class="number">10000</span>,                  <span class="comment">// Close idle connections after 10s</span>
+    statement_timeout: <span class="number">15000</span>,                  <span class="comment">// Query timeout in ms</span>
+    application_name: <span class="string">"jail-thana-management"</span>  <span class="comment">// App identifier</span>
+});</code></pre>
+
+<div class="explanation">
+    <h4>What This Code Does:</h4>
+    <ul>
+        <li><strong>dotenv.config():</strong> Loads database credentials from a <code>.env</code> file. This keeps passwords out of source code.</li>
+        <li><strong>Connection Pool:</strong> Instead of creating a new connection for every query (slow), a pool keeps multiple connections ready:
+            <ul>
+                <li><code>min: 2</code> - Always keep at least 2 connections ready</li>
+                <li><code>max: 10</code> - Never exceed 10 concurrent connections</li>
+            </ul>
+        </li>
+        <li><strong>statement_timeout:</strong> Prevents long-running queries from blocking the database (15 second limit).</li>
+    </ul>
+</div>
+
+<h2>5.2 Per-Connection Setup</h2>
+
+<pre><code><span class="comment">// Hook that runs when a new connection is established</span>
+pool.on(<span class="string">"connect"</span>, <span class="keyword">async</span> (client) => {
+    <span class="keyword">await</span> client.query(<span class="string">`
+        SET search_path TO public; 
+        SET timezone TO 'UTC'; 
+        SET enable_seqscan TO off
+    `</span>);
+});</code></pre>
+
+<div class="explanation">
+    <h4>What This Code Does:</h4>
+    <ul>
+        <li><strong>pool.on("connect"):</strong> An event handler that runs every time a new database connection is created.</li>
+        <li><strong>search_path = public:</strong> Tells PostgreSQL to look in the 'public' schema first when querying tables.</li>
+        <li><strong>timezone = Asia/Dhaka:</strong> Bangladesh Standard Time for accurate local timestamps.</li>
+    </ul>
+</div>
+
+<h2>5.3 Environment Variables (.env)</h2>
+
+<pre><code>PGHOST=localhost
+PGPORT=5432
+PGUSER=postgres
+PGPASSWORD=admin123
+PGDATABASE=black_vein_oracle
+PGPOOL_MIN=2
+PGPOOL_MAX=10</code></pre>
+
+<div class="info-box">
+    <p><strong>Security Note:</strong> The <code>.env</code> file should never be committed to version control. It contains sensitive credentials.</p>
+</div>
+
+<h2>5.4 Query Execution Pattern</h2>
+
+<pre><code><span class="comment">// Example: Get all criminals with high risk level</span>
+<span class="keyword">async function</span> <span class="function">getHighRiskCriminals</span>() {
+    <span class="keyword">const</span> query = <span class="string">`
+        SELECT criminal_id, full_name, risk_level, status
+        FROM criminals
+        WHERE risk_level >= 7
+        ORDER BY risk_level DESC
+    `</span>;
+
+    <span class="keyword">try</span> {
+        <span class="keyword">const</span> result = <span class="keyword">await</span> pool.query(query);
+        <span class="keyword">return</span> result.rows;
+    } <span class="keyword">catch</span> (error) {
+        console.error(<span class="string">"Database error:"</span>, error.message);
+        <span class="keyword">throw</span> error;
+    }
+}</code></pre>
+
+<div class="explanation">
+    <h4>What This Code Does:</h4>
+    <ul>
+        <li><strong>async/await:</strong> Handles asynchronous database operations - waits for the query to complete.</li>
+        <li><strong>pool.query():</strong> Sends the SQL query to the database and returns results.</li>
+        <li><strong>result.rows:</strong> Contains the array of matching records returned by the query.</li>
+        <li><strong>try/catch:</strong> Error handling - if the query fails, it logs the error and throws it for the caller to handle.</li>
+    </ul>
+</div>
+
+<hr>
+
+<!-- ==================== SECTION 6: VIEWS ==================== -->
+<h1 id="section6" class="page-break">6. Views Implementation</h1>
+
+<div class="info-box">
+    <p><strong>What is a View?</strong> A view is a virtual table based on a SQL query. It doesn't store data itself but provides a convenient way to access complex queries as if they were simple tables.</p>
+</div>
+
+<h2>6.1 Criminal Last Location View</h2>
+<p><strong>Purpose:</strong> Shows each criminal with their most recently spotted location.</p>
+
+<pre><code><span class="keyword">CREATE VIEW</span> v_criminal_last_location <span class="keyword">AS</span>
+<span class="keyword">SELECT</span>
+    c.criminal_id,
+    c.full_name,
+    c.status,
+    c.risk_level,
+    cl.noted_at <span class="keyword">AS</span> last_seen_at,
+    l.district,
+    l.thana_area,
+    l.address
+<span class="keyword">FROM</span> criminals c
+<span class="keyword">LEFT JOIN LATERAL</span> (
+    <span class="keyword">SELECT</span> *
+    <span class="keyword">FROM</span> criminal_locations cl
+    <span class="keyword">WHERE</span> cl.criminal_id = c.criminal_id
+    <span class="keyword">ORDER BY</span> cl.noted_at <span class="keyword">DESC</span>
+    <span class="keyword">LIMIT</span> <span class="number">1</span>
+) cl <span class="keyword">ON TRUE</span>
+<span class="keyword">LEFT JOIN</span> locations l <span class="keyword">ON</span> l.location_id = cl.location_id;</code></pre>
+
+<div class="explanation">
+    <h4>What This Code Does:</h4>
+    <ul>
+        <li><strong>LATERAL JOIN:</strong> A special join that allows the subquery to reference columns from the outer query (c.criminal_id).</li>
+        <li><strong>ORDER BY noted_at DESC LIMIT 1:</strong> Gets only the most recent location entry for each criminal.</li>
+        <li><strong>LEFT JOIN:</strong> Includes criminals even if they have no location records (returns NULL for location fields).</li>
+    </ul>
+</div>
+
+<h2>6.2 Thana Case Summary View</h2>
+<p><strong>Purpose:</strong> Aggregates case statistics per police station.</p>
+
+<pre><code><span class="keyword">CREATE VIEW</span> v_thana_case_summary <span class="keyword">AS</span>
+<span class="keyword">SELECT</span>
+    t.thana_id,
+    t.name <span class="keyword">AS</span> thana_name,
+    <span class="function">COUNT</span>(cf.case_id) <span class="keyword">FILTER</span> (<span class="keyword">WHERE</span> cf.status = <span class="string">'open'</span>) <span class="keyword">AS</span> open_cases,
+    <span class="function">COUNT</span>(cf.case_id) <span class="keyword">FILTER</span> (<span class="keyword">WHERE</span> cf.status = <span class="string">'investigating'</span>) <span class="keyword">AS</span> investigating_cases,
+    <span class="function">COUNT</span>(cf.case_id) <span class="keyword">FILTER</span> (<span class="keyword">WHERE</span> cf.status = <span class="string">'closed'</span>) <span class="keyword">AS</span> closed_cases
+<span class="keyword">FROM</span> thanas t
+<span class="keyword">LEFT JOIN</span> case_files cf <span class="keyword">ON</span> cf.thana_id = t.thana_id
+<span class="keyword">GROUP BY</span> t.thana_id, t.name;</code></pre>
+
+<div class="explanation">
+    <h4>What This Code Does:</h4>
+    <ul>
+        <li><strong>FILTER (WHERE ...):</strong> PostgreSQL-specific syntax that counts only rows matching the condition.</li>
+        <li><strong>GROUP BY:</strong> Groups results by thana, so we get one row per police station with its case counts.</li>
+        <li><strong>Result:</strong> Shows how many open, investigating, and closed cases each thana has.</li>
+    </ul>
+</div>
+
+<h2>6.3 GD Status Summary View</h2>
+<pre><code><span class="keyword">CREATE VIEW</span> v_gd_status_summary <span class="keyword">AS</span>
+<span class="keyword">SELECT</span>
+    thana_id,
+    <span class="function">COUNT</span>(*) <span class="keyword">FILTER</span> (<span class="keyword">WHERE</span> status = <span class="string">'submitted'</span>) <span class="keyword">AS</span> submitted_count,
+    <span class="function">COUNT</span>(*) <span class="keyword">FILTER</span> (<span class="keyword">WHERE</span> status = <span class="string">'approved'</span>) <span class="keyword">AS</span> approved_count,
+    <span class="function">COUNT</span>(*) <span class="keyword">FILTER</span> (<span class="keyword">WHERE</span> status = <span class="string">'rejected'</span>) <span class="keyword">AS</span> rejected_count
+<span class="keyword">FROM</span> gd_reports
+<span class="keyword">GROUP BY</span> thana_id;</code></pre>
+
+<hr>
+
+<!-- ==================== SECTION 7: TRIGGERS ==================== -->
+<h1 id="section7" class="page-break">7. Triggers Implementation</h1>
+
+<div class="info-box">
+    <p><strong>What is a Trigger?</strong> A trigger is a function that automatically executes when certain events (INSERT, UPDATE, DELETE) occur on a table. It's used to enforce business rules and maintain data integrity.</p>
+</div>
+
+<h2>7.1 Bail Date Validation Trigger</h2>
+<p><strong>Purpose:</strong> Ensures bail_due_date is never before arrest_date.</p>
+
+<pre><code><span class="comment">-- Step 1: Create the trigger function</span>
+<span class="keyword">CREATE OR REPLACE FUNCTION</span> <span class="function">fn_validate_arrest_bail_dates</span>()
+<span class="keyword">RETURNS TRIGGER AS</span> $$
+<span class="keyword">BEGIN</span>
+    <span class="keyword">IF</span> NEW.bail_due_date <span class="keyword">IS NOT NULL AND</span> NEW.bail_due_date < NEW.arrest_date <span class="keyword">THEN</span>
+        <span class="keyword">RAISE EXCEPTION</span> <span class="string">'bail_due_date must be >= arrest_date'</span>;
+    <span class="keyword">END IF</span>;
+    <span class="keyword">RETURN</span> NEW;
+<span class="keyword">END</span>;
+$$ <span class="keyword">LANGUAGE</span> plpgsql;
+
+<span class="comment">-- Step 2: Attach trigger to the table</span>
+<span class="keyword">CREATE TRIGGER</span> trg_validate_arrest_bail_dates
+<span class="keyword">BEFORE INSERT OR UPDATE OF</span> arrest_date, bail_due_date
+<span class="keyword">ON</span> arrest_records
+<span class="keyword">FOR EACH ROW EXECUTE FUNCTION</span> <span class="function">fn_validate_arrest_bail_dates</span>();</code></pre>
+
+<div class="explanation">
+    <h4>What This Code Does:</h4>
+    <ul>
+        <li><strong>BEFORE INSERT OR UPDATE:</strong> Runs BEFORE the data is saved - can prevent bad data from entering.</li>
+        <li><strong>NEW.bail_due_date:</strong> References the value being inserted/updated.</li>
+        <li><strong>RAISE EXCEPTION:</strong> Aborts the operation with an error message if validation fails.</li>
+        <li><strong>RETURN NEW:</strong> If validation passes, allows the operation to proceed.</li>
+    </ul>
+</div>
+
+<div class="warning-box">
+    <p><strong>Example - This Insert Will Fail:</strong></p>
+    <pre style="margin: 10px 0; background: #2d2d2d;"><code><span class="keyword">INSERT INTO</span> arrest_records (criminal_id, thana_id, arrest_date, bail_due_date, custody_status)
+<span class="keyword">VALUES</span> (<span class="string">'uuid...'</span>, <span class="number">1</span>, <span class="string">'2024-06-15'</span>, <span class="string">'2024-06-01'</span>, <span class="string">'in_custody'</span>);
+<span class="comment">-- Error: bail_due_date must be >= arrest_date</span></code></pre>
+</div>
+
+<hr>
+
+<!-- ==================== SECTION 8: INDEXES ==================== -->
+<h1 id="section8" class="page-break">8. Indexes and Optimization</h1>
+
+<div class="info-box">
+    <p><strong>What is an Index?</strong> An index is like a book's index - it helps the database find data faster without scanning every row. Without indexes, searching a million records means checking all million. With an index, it might check only 10-20 entries.</p>
+</div>
+
+<h2>8.1 Index Strategy</h2>
+
+<pre><code><span class="comment">-- Speed up criminal searches by thana</span>
+<span class="keyword">CREATE INDEX</span> idx_criminals_thana <span class="keyword">ON</span> criminals(registered_thana_id);
+
+<span class="comment">-- Speed up case lookups by status</span>
+<span class="keyword">CREATE INDEX</span> idx_case_status <span class="keyword">ON</span> case_files(status);
+
+<span class="comment">-- Speed up GD report lookups by user</span>
+<span class="keyword">CREATE INDEX</span> idx_gd_user <span class="keyword">ON</span> gd_reports(user_id);
+
+<span class="comment">-- Speed up location tracking queries (composite index)</span>
+<span class="keyword">CREATE INDEX</span> idx_criminal_loc_time <span class="keyword">ON</span> criminal_locations(criminal_id, noted_at <span class="keyword">DESC</span>);
+
+<span class="comment">-- Speed up officer lookups by thana</span>
+<span class="keyword">CREATE INDEX</span> idx_officers_thana <span class="keyword">ON</span> officers(thana_id);
+
+<span class="comment">-- Speed up arrest records by date</span>
+<span class="keyword">CREATE INDEX</span> idx_arrests_date <span class="keyword">ON</span> arrest_records(arrest_date <span class="keyword">DESC</span>);</code></pre>
+
+<div class="explanation">
+    <h4>What This Code Does:</h4>
+    <ul>
+        <li><strong>CREATE INDEX:</strong> Creates a fast-lookup structure on the specified column(s).</li>
+        <li><strong>Composite Index (criminal_id, noted_at DESC):</strong> Optimized for queries that filter by criminal_id and sort by time.</li>
+        <li><strong>DESC:</strong> Sorts the index in descending order - efficient for "get most recent" queries.</li>
+    </ul>
+</div>
+
+<h2>8.2 When Indexes Help</h2>
+<table>
+    <tr>
+        <th>Query Pattern</th>
+        <th>Index Used</th>
+    </tr>
+    <tr>
+        <td>Find criminals at thana X</td>
+        <td>idx_criminals_thana</td>
+    </tr>
+    <tr>
+        <td>Find open cases</td>
+        <td>idx_case_status</td>
+    </tr>
+    <tr>
+        <td>User's GD reports</td>
+        <td>idx_gd_user</td>
+    </tr>
+    <tr>
+        <td>Criminal's location history</td>
+        <td>idx_criminal_loc_time</td>
+    </tr>
+    <tr>
+        <td>Recent arrests</td>
+        <td>idx_arrests_date</td>
+    </tr>
+</table>
+
+<hr>
+
+<!-- ==================== SECTION 9: SAMPLE QUERIES ==================== -->
+<h1 id="section9" class="page-break">9. Sample Queries</h1>
+
+<h2>9.1 Basic Queries</h2>
+
+<h3>Get all thanas with their head officers:</h3>
+<pre><code><span class="keyword">SELECT</span>
+    t.name <span class="keyword">AS</span> thana_name,
+    t.district,
+    o.full_name <span class="keyword">AS</span> head_officer,
+    o.badge_no
+<span class="keyword">FROM</span> thanas t
+<span class="keyword">LEFT JOIN</span> officers o <span class="keyword">ON</span> t.head_officer_id = o.officer_id
+<span class="keyword">ORDER BY</span> t.district, t.name;</code></pre>
+
+<h3>Get criminals with high risk level:</h3>
+<pre><code><span class="keyword">SELECT</span>
+    full_name,
+    nid_or_alias <span class="keyword">AS</span> alias,
+    risk_level,
+    status
+<span class="keyword">FROM</span> criminals
+<span class="keyword">WHERE</span> risk_level >= <span class="number">7</span>
+<span class="keyword">ORDER BY</span> risk_level <span class="keyword">DESC</span>;</code></pre>
+
+<h2>9.2 Join Queries</h2>
+
+<h3>Get arrests with criminal and thana details:</h3>
+<pre><code><span class="keyword">SELECT</span>
+    ar.arrest_id,
+    c.full_name <span class="keyword">AS</span> criminal_name,
+    t.name <span class="keyword">AS</span> arresting_thana,
+    ar.arrest_date,
+    ar.custody_status
+<span class="keyword">FROM</span> arrest_records ar
+<span class="keyword">JOIN</span> criminals c <span class="keyword">ON</span> ar.criminal_id = c.criminal_id
+<span class="keyword">JOIN</span> thanas t <span class="keyword">ON</span> ar.thana_id = t.thana_id
+<span class="keyword">ORDER BY</span> ar.arrest_date <span class="keyword">DESC</span>;</code></pre>
+
+<h2>9.3 Aggregate Queries</h2>
+
+<h3>Count prisoners per jail:</h3>
+<pre><code><span class="keyword">SELECT</span>
+    j.name <span class="keyword">AS</span> jail_name,
+    j.capacity,
+    <span class="function">COUNT</span>(i.incarceration_id) <span class="keyword">AS</span> current_inmates,
+    j.capacity - <span class="function">COUNT</span>(i.incarceration_id) <span class="keyword">AS</span> available_space
+<span class="keyword">FROM</span> jails j
+<span class="keyword">LEFT JOIN</span> incarcerations i <span class="keyword">ON</span> j.jail_id = i.jail_id <span class="keyword">AND</span> i.released_at <span class="keyword">IS NULL</span>
+<span class="keyword">GROUP BY</span> j.jail_id, j.name, j.capacity
+<span class="keyword">ORDER BY</span> current_inmates <span class="keyword">DESC</span>;</code></pre>
+
+<h3>GD reports per thana with approval rate:</h3>
+<pre><code><span class="keyword">SELECT</span>
+    t.name <span class="keyword">AS</span> thana_name,
+    <span class="function">COUNT</span>(*) <span class="keyword">AS</span> total_reports,
+    <span class="function">COUNT</span>(*) <span class="keyword">FILTER</span> (<span class="keyword">WHERE</span> g.status = <span class="string">'approved'</span>) <span class="keyword">AS</span> approved,
+    <span class="function">ROUND</span>(
+        <span class="number">100.0</span> * <span class="function">COUNT</span>(*) <span class="keyword">FILTER</span> (<span class="keyword">WHERE</span> g.status = <span class="string">'approved'</span>) / <span class="function">NULLIF</span>(<span class="function">COUNT</span>(*), <span class="number">0</span>),
+        <span class="number">1</span>
+    ) <span class="keyword">AS</span> approval_rate_percent
+<span class="keyword">FROM</span> thanas t
+<span class="keyword">LEFT JOIN</span> gd_reports g <span class="keyword">ON</span> t.thana_id = g.thana_id
+<span class="keyword">GROUP BY</span> t.thana_id, t.name
+<span class="keyword">ORDER BY</span> total_reports <span class="keyword">DESC</span>;</code></pre>
+
+<h2>9.4 Subquery Examples</h2>
+
+<h3>Find criminals with pending bail:</h3>
+<pre><code><span class="keyword">SELECT</span> c.full_name, c.status
+<span class="keyword">FROM</span> criminals c
+<span class="keyword">WHERE</span> c.criminal_id <span class="keyword">IN</span> (
+    <span class="keyword">SELECT</span> ar.criminal_id
+    <span class="keyword">FROM</span> arrest_records ar
+    <span class="keyword">JOIN</span> bail_records br <span class="keyword">ON</span> ar.arrest_id = br.arrest_id
+    <span class="keyword">WHERE</span> br.status = <span class="string">'pending'</span>
+);</code></pre>
+
+<hr>
+
+<!-- ==================== FOOTER ==================== -->
+<div class="footer">
+    <p><strong>Document Prepared for Academic Evaluation</strong></p>
+    <p>Database Management Systems Course Project</p>
+    <p>Bangladesh Jail & Thana Management System</p>
+</div>
+
+</body>
+</html>
